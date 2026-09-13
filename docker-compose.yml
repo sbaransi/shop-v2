@@ -1,0 +1,37 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: shop-v2-postgres
+
+    environment:
+      POSTGRES_DB: shopdb
+      POSTGRES_USER: shopuser
+      POSTGRES_PASSWORD: shoppass
+
+    ports:
+      - "5433:5432"
+
+  backend:
+    build:
+      context: ./backend
+
+    container_name: shop-v2-backend
+
+    ports:
+      - "5002:5001"
+
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: shop-v2-frontend
+
+    ports:
+      - "5173:5173"
+
+    depends_on:
+      - backend
