@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_HUB = credentials('dockerhub')
+    }
+
     stages {
 
         stage('Build Backend') {
@@ -16,6 +20,16 @@ pipeline {
                 dir('frontend') {
                     sh 'docker build -t sammybaransi537/shop-v2-frontend:latest .'
                 }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                sh '''
+                echo $DOCKER_HUB_PSW | docker login \
+                -u $DOCKER_HUB_USR \
+                --password-stdin
+                '''
             }
         }
 
