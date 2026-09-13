@@ -6,7 +6,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('backend') {
-                    sh 'docker build -t shop-v2-backend:v1 .'
+                    sh 'docker build -t sammybaransi537/shop-v2-backend:latest .'
                 }
             }
         }
@@ -14,10 +14,21 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh 'docker build -t shop-v2-frontend:v1 .'
+                    sh 'docker build -t sammybaransi537/shop-v2-frontend:latest .'
                 }
             }
         }
 
+        stage('Push Backend') {
+            steps {
+                sh 'docker push sammybaransi537/shop-v2-backend:latest'
+            }
+        }
+
+        stage('Push Frontend') {
+            steps {
+                sh 'docker push sammybaransi537/shop-v2-frontend:latest'
+            }
+        }
     }
 }
