@@ -1,0 +1,215 @@
+---
+# Source: shop-v2-chart/templates/postgres-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+
+type: Opaque
+
+stringData:
+  POSTGRES_PASSWORD: shoppass
+
+---
+# Source: shop-v2-chart/templates/postgres-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+
+data:
+  POSTGRES_DB: shopdb
+  POSTGRES_USER: shopuser
+
+---
+# Source: shop-v2-chart/templates/postgres-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# Source: shop-v2-chart/templates/backend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+
+spec:
+  selector:
+    app: backend
+
+  ports:
+  - port: 5001
+    targetPort: 5001
+
+---
+# Source: shop-v2-chart/templates/frontend-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+
+spec:
+  selector:
+    app: frontend
+
+  ports:
+  - port: 5173
+    targetPort: 5173
+
+---
+# Source: shop-v2-chart/templates/postgres-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+
+spec:
+  selector:
+    app: postgres
+
+  ports:
+  - port: 5432
+    targetPort: 5432
+
+---
+# Source: shop-v2-chart/templates/backend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: backend
+
+  template:
+    metadata:
+      labels:
+        app: backend
+
+    spec:
+      containers:
+      - name: backend
+        image: sammybaransi537/shop-v2-backend:latest
+
+        ports:
+        - containerPort: 5001
+
+---
+# Source: shop-v2-chart/templates/frontend-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: frontend
+
+  template:
+    metadata:
+      labels:
+        app: frontend
+
+    spec:
+      containers:
+      - name: frontend
+        image: sammybaransi537/shop-v2-frontend:latest
+
+        ports:
+        - containerPort: 5173
+
+---
+# Source: shop-v2-chart/templates/postgres-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: postgres
+
+  template:
+    metadata:
+      labels:
+        app: postgres
+
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16
+
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: POSTGRES_DB
+
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: POSTGRES_USER
+
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+
+        ports:
+        - containerPort: 5432
+
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+# Source: shop-v2-chart/templates/frontend-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shop-v2-ingress
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+  - host: shop-v2.local
+
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 5173

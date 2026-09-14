@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shop-v2-ingress
+
+spec:
+  ingressClassName: nginx
+
+  rules:
+  - host: shop-v2.local
+
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 5173

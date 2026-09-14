@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: shop-v2
+
+data:
+  POSTGRES_DB: shopdb
+  POSTGRES_USER: shopuser
