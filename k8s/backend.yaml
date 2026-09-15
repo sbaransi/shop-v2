@@ -22,6 +22,7 @@ spec:
 
         image: sammybaransi537/shop-v2-backend:latest
 
+
         ports:
         - containerPort: 5001
 

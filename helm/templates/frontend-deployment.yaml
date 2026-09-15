@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: sammybaransi537/shop-v2-frontend:latest
+        image: {{ .Values.frontend.image }}
 
         ports:
         - containerPort: 5173

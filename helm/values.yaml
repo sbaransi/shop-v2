@@ -1,3 +1,12 @@
 postgres:
   storage: 1Gi
 
+backend:
+  image: sammybaransi537/shop-v2-backend:latest
+
+frontend:
+  image: sammybaransi537/shop-v2-frontend:latest
+
+ingress:
+  host: shop-v2.local
+

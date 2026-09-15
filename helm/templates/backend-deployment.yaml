@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: sammybaransi537/shop-v2-backend:latest
+        image: {{ .Values.backend.image }}
 
         ports:
         - containerPort: 5001
